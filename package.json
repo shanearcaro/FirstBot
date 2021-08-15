@@ -1,9 +1,9 @@
 {
   "name": "FirstBot",
   "version": "1.0.0",
-  "description": "First Discord Bot",
+  "description": "First Discord Bot written in Typescript",
   "main": "index.js",
-  "repository": "https://github.com/shanearcaro/FirstBot",
+  "repository": "https://github.com/shanearcaro/FirstBot.git",
   "author": "Shane Arcaro",
   "license": "MIT"
 }
