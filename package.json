@@ -5,5 +5,14 @@
   "main": "index.js",
   "repository": "https://github.com/shanearcaro/FirstBot.git",
   "author": "Shane Arcaro",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "run": "node ./dist/index.js",
+    "dev": "nodemon ./src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "discord.js": "^13.1.0",
+    "nodemon": "^2.0.12"
+  }
 }
