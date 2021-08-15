@@ -1,0 +1,9 @@
+{
+  "name": "FirstBot",
+  "version": "1.0.0",
+  "description": "First Discord Bot",
+  "main": "index.js",
+  "repository": "https://github.com/shanearcaro/FirstBot",
+  "author": "Shane Arcaro",
+  "license": "MIT"
+}
