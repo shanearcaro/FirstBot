@@ -26,7 +26,7 @@ export function getArgumentsAsArray(message: Message): string[] {
     if (content.indexOf(" ") === -1 || !startsWithPrefix(message))
         return [""];
 
-    const text = content.substring(content.indexOf(" "));
+    const text = content.substring(content.indexOf(" ") + 1);
     return text.split(" ");
 }
 
@@ -38,6 +38,15 @@ export function getArgumentsAsString(message: Message): string {
     if (content.indexOf(" ") === -1 || !startsWithPrefix(message))
         return "";
 
-    const text = content.substring(content.indexOf(" "));
+    const text = content.substring(content.indexOf(" ") + 1);
     return text;
+}
+
+export function stringArrayToNumberArray(array: string[]): number[] {
+    let numberArray: number[] = [];
+
+    array.forEach(( value: string, index: number) => {
+        numberArray[index] = Number(value);
+    });
+    return numberArray;
 }

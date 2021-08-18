@@ -1,5 +1,6 @@
 import Discord, { Client, Message, Intents } from "discord.js";
 import { replyMessage } from "./commands";
+import * as AmongUs from "./amongus";
 const { token } = require("../src/config");
 
 const client = new Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
