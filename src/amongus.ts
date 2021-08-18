@@ -31,6 +31,7 @@ export class AmongUs {
 
 export type Player = {
     user: string,
+    nickname: string,
     id: string,
     role: roles,
     tasks?: Task[],

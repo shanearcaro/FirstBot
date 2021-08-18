@@ -134,6 +134,8 @@ commandCollection.push({
         const userTag: string = message.author.tag;
         const username: string = message.author.username;
         const userID: string = message.author.id;
+        const nickname: string = message.member?.nickname ?? username;
+
         let alreadyJoined: boolean = false;
         game.players.some((player: Player) => {
             if (player.user === userTag) {
@@ -148,6 +150,7 @@ commandCollection.push({
 
         let player: Player = {
             user: userTag,
+            nickname: nickname,
             id: userID,
             role: roles.PLAYER
         }
@@ -169,6 +172,7 @@ commandCollection.push({
 
         const userTag: string = message.author.tag;
         const username: string = message.author.username;
+        const nickname: string = message.member?.nickname ?? username;
         let leftGame: boolean = false;
         game.players.forEach((player: Player, index: number) => {
             if (player.user === userTag) {
@@ -181,9 +185,9 @@ commandCollection.push({
         });
 
         if (leftGame)
-            message.channel.send(util.sendMessage(`${username} has left! [${game.players.length}/${game.maxNumberOfPlayers}]`));
+            message.channel.send(util.sendMessage(`${nickname} has left! [${game.players.length}/${game.maxNumberOfPlayers}]`));
         else
-            message.channel.send(util.sendMessage(`You are not currently in the game ${username}!`));
+            message.channel.send(util.sendMessage(`You are not currently in the game ${nickname}!`));
     }
 });
 
@@ -222,6 +226,7 @@ commandCollection.push({
 
         const userTag: string = message.author.tag;
         const username: string = message.author.username;
+        const nickname: string = message.member?.nickname ?? username;
         let playerJoined: boolean = false;
         game.players.forEach((player: Player) => {
             if (player.user === userTag)
@@ -230,7 +235,7 @@ commandCollection.push({
 
         // If player isn't in the game, can't join as moderator
         if (!playerJoined) {
-            message.channel.send(util.sendMessage(`You are not apart of the game ${username}`));
+            message.channel.send(util.sendMessage(`You are not apart of the game ${nickname}`));
             message.channel.send(util.sendMessage(`Use ${prefix}join to join now`));
             return;
         }
@@ -259,7 +264,7 @@ commandCollection.push({
             return;
         }
 
-        message.channel.send(util.sendMessage(`${username} is now a MODERATOR!`));
+        message.channel.send(util.sendMessage(`${nickname} is now a MODERATOR!`));
     }
 })
 
@@ -275,19 +280,20 @@ commandCollection.push({
 
         const userTag: string = message.author.tag;
         const username: string = message.author.username;
+        const nickname: string = message.member?.nickname ?? username;
         if (gameHost !== userTag) {
             message.channel.send(util.sendMessage(`Cannot start game: you are not the creator`));
             message.channel.send(util.sendMessage(`${gameHostName} has permission to start the game.`));
             return
         }
 
-        const minimumPlayers: number = game!.numberOfImpostors * 2 + game!.numberOfModerators;
+        // const minimumPlayers: number = game!.numberOfImpostors * 2 + game!.numberOfModerators;
 
-        if (game!.players.length < minimumPlayers) {
-            message.channel.send(util.sendMessage(`Cannot start game: minimum players needed: ${minimumPlayers}`));
-            message.channel.send(util.sendMessage(`Currently have [${game.players.length}/${game.maxNumberOfPlayers}]`))
-            return;
-        }
+        // if (game!.players.length < minimumPlayers) {
+        //     message.channel.send(util.sendMessage(`Cannot start game: minimum players needed: ${minimumPlayers}`));
+        //     message.channel.send(util.sendMessage(`Currently have [${game.players.length}/${game.maxNumberOfPlayers}]`))
+        //     return;
+        // }
 
         let numbers: number[] = [];
 
@@ -300,7 +306,7 @@ commandCollection.push({
             for (let i = 0; i < game.numberOfModerators; i++) {
                 let random = Math.trunc(Math.random() * numbers.length)
                 game.players[numbers[random]].role = roles.MOD;
-                message.channel.send(util.sendMessage(`${game.players[numbers[random]].user} has been picked as a morderator.`))
+                message.channel.send(util.sendMessage(`${game.players[numbers[random]].nickname} has been picked as a morderator.`))
                 numbers.splice(random, 1); 
             }
             numbers = [];
@@ -317,9 +323,27 @@ commandCollection.push({
             game.players[numbers[random]].role = roles.IMPOSTOR;
             client.users.fetch(game.players[numbers[random]].id).then((user: User) => {
                 user.send(util.sendMessage(`You are the imposter!`));
+                if (game!.numberOfImpostors === 1)
+                    user.send(util.sendMessage(`You have no allies.`));
             });
             numbers.splice(random, 1);
         }
+
+        if (game.numberOfImpostors > 1) {
+            game.players.forEach((player: Player) => {
+                if (player.role === roles.IMPOSTOR) {
+                    let otherImposters: string[] = [];
+                    game!.players.forEach((imposter: Player) => {
+                        if (imposter.role === roles.IMPOSTOR && imposter.user != player.user)
+                            otherImposters.push(imposter.nickname);
+                    })
+                    client.users.fetch(player.id).then((user: User) => {
+                        user.send(util.sendMessage(`Your imposter allies are: ${otherImposters}`));
+                    });
+                }
+            });
+        }
+        message.channel.send(util.sendMessage(`The game has now started, good luck!`));
 
         // Assign players roles and tasks
     }
