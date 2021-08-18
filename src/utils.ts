@@ -1,5 +1,8 @@
 import { Message } from "discord.js";
 const { prefix } = require("../src/config");
+const prepend: string = "🔥 ";
+const bold: string = "**";
+const italicize: string = "*";
 
 // True if message starts with prefix, false otherwise
 export function startsWithPrefix(message: Message): boolean {
@@ -49,4 +52,11 @@ export function stringArrayToNumberArray(array: string[]): number[] {
         numberArray[index] = Number(value);
     });
     return numberArray;
+}
+
+export function sendMessage(message: string, bold: boolean = false, italicize: boolean = false): string {
+    message = prepend + message;
+    if (bold) message = bold + message + bold;
+    if (italicize) message = italicize + message + italicize;
+    return message;
 }

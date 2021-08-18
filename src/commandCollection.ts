@@ -4,8 +4,6 @@ import { Command } from "./commands";
 import * as util from "./utils"
 const { prefix } = require("../src/config");
 
-const prepend: string = "🔥 ";
-
 export const commandCollection: Command[] = [];
 let game: AmongUs | null = null;
 
@@ -55,8 +53,8 @@ commandCollection.push({
     description: "Start an Among Us Game, Arguments: MaxNumberOfPlayers, NumberOfShortTasks, NumberOfCommonTasks, NumberOfLongTasks, NumberOfModerators, NumberOfImpostors",
     response: (client: Client, message: Message) => {
         if (game !== null) {
-            message.channel.send(`**${prepend}A game has already been created!**`);
-            message.channel.send(`**${prepend}Use ${prefix}quit to end the current game.**`);
+            message.channel.send(util.sendMessage("A game has already been created", true));
+            message.channel.send(util.sendMessage(`Use ${prefix}quit to end the current game.`, true));
             return;
         }
 
@@ -68,8 +66,8 @@ commandCollection.push({
 
         console.log();
         console.log(game);
-        message.channel.send(`**
-        ${prepend}Created Among Us Game**:
+        message.channel.send(util.sendMessage(`
+        Created Among Us Game**:
         **Max Number of Players**: ${game.maxNumberOfPlayers}
         **Number of Short Tasks**: ${game.numberOfShortTasks}
         **Number of Common Tasks**: ${game.numberOfCommonTasks}
@@ -77,7 +75,7 @@ commandCollection.push({
         **Number of Moderators**: ${game.numberOfModerators}
         **Number of Impostors**: ${game.numberOfImpostors}
         
-        Type ${prefix}join to join now`)
+        Type ${prefix}join to join now`, true))
     }
 });
 
@@ -86,14 +84,14 @@ commandCollection.push({
     description: "Join an AmongUs game",
     response: (client: Client, message: Message) => {
         if (game === null) {
-            message.channel.send(`**${prepend}Cannot join game: no game is active.**`);
-            message.channel.send(`**${prepend}Use ${prefix}createGame to create a new game.**`);
+            message.channel.send(util.sendMessage(`Cannot join game: no game is active.`, true));
+            message.channel.send(util.sendMessage(`Use ${prefix}createGame to create a new game.**`, true));
             return;
         }
 
         if (game.players.length === game.maxNumberOfPlayers) {
-            message.channel.send(`**${prepend}Max number of players reached!**`);
-            message.channel.send(`**${prepend}Either change the maximum number of players allowed or sit out for now.**`);
+            message.channel.send(util.sendMessage(`Max number of players reached!**`, true));
+            message.channel.send(util.sendMessage(`Either change the maximum number of players allowed or sit out for now.**`, true));
             return;
         }
 
@@ -102,7 +100,7 @@ commandCollection.push({
         game.players.some((player: Player) => {
             if (player.user === userTag) {
                 // Player has already joined the game
-                message.channel.send(`**🔥You have already joined the game ${userTag}**`);
+                message.channel.send(util.sendMessage(`You have already joined the game ${userTag}**`, true));
                 alreadyJoined = true;
             }
         });
@@ -115,6 +113,6 @@ commandCollection.push({
         }
 
         game.players.push(player);
-        message.channel.send(`**🔥${userTag} has joined! [${game.players.length}/${game.maxNumberOfPlayers}]**`)
+        message.channel.send(util.sendMessage(`${userTag} has joined! [${game.players.length}/${game.maxNumberOfPlayers}]**`, true))
     }
 });
