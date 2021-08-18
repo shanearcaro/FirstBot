@@ -54,9 +54,9 @@ export function stringArrayToNumberArray(array: string[]): number[] {
     return numberArray;
 }
 
-export function sendMessage(message: string, bold: boolean = false, italicize: boolean = false): string {
+export function sendMessage(message: string, isBold: boolean = false, isItalic: boolean = false): string {
     message = prepend + message;
-    if (bold) message = bold + message + bold;
-    if (italicize) message = italicize + message + italicize;
+    if (isBold) message = bold + message + bold;
+    if (isItalic) message = italicize + message + italicize;
     return message;
 }

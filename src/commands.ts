@@ -21,7 +21,7 @@ export function replyMessage(client: Client, message: Message): void {
     let messageCommand = util.getCommand(message);
     console.log(`Message Command: ${messageCommand}`);
     commandCollection.some((cmd: Command) => {
-        if (cmd.command === messageCommand) {
+        if (cmd.command.toLowerCase() === messageCommand.toLowerCase()) {
             console.log(`Responding to: ${message.content}`)
             console.log();
             cmd.response(client, message);

@@ -52,6 +52,7 @@ commandCollection.push({
     command: "createGame",
     description: "Start an Among Us Game, Arguments: MaxNumberOfPlayers, NumberOfShortTasks, NumberOfCommonTasks, NumberOfLongTasks, NumberOfModerators, NumberOfImpostors",
     response: (client: Client, message: Message) => {
+        // Check if game exists
         if (game !== null) {
             message.channel.send(util.sendMessage("A game has already been created", true));
             message.channel.send(util.sendMessage(`Use ${prefix}quit to end the current game.`, true));
@@ -66,16 +67,15 @@ commandCollection.push({
 
         console.log();
         console.log(game);
-        message.channel.send(util.sendMessage(`
-        Created Among Us Game**:
-        **Max Number of Players**: ${game.maxNumberOfPlayers}
-        **Number of Short Tasks**: ${game.numberOfShortTasks}
-        **Number of Common Tasks**: ${game.numberOfCommonTasks}
-        **Number of Long Tasks**: ${game.numberOfLongTasks}
-        **Number of Moderators**: ${game.numberOfModerators}
-        **Number of Impostors**: ${game.numberOfImpostors}
-        
-        Type ${prefix}join to join now`, true))
+        message.channel.send(util.sendMessage(`Created Among Us Game:
+        Max Number of Players: ${game.maxNumberOfPlayers}
+        Number of Short Tasks: ${game.numberOfShortTasks}
+        Number of Common Tasks: ${game.numberOfCommonTasks}
+        Number of Long Tasks: ${game.numberOfLongTasks}
+        Number of Moderators: ${game.numberOfModerators}
+        Number of Impostors: ${game.numberOfImpostors}`, true));
+
+        message.channel.send(util.sendMessage(`Type ${prefix}join to join now`));
     }
 });
 
@@ -83,15 +83,17 @@ commandCollection.push({
     command: "join",
     description: "Join an AmongUs game",
     response: (client: Client, message: Message) => {
+        // Check if game exists
         if (game === null) {
             message.channel.send(util.sendMessage(`Cannot join game: no game is active.`, true));
-            message.channel.send(util.sendMessage(`Use ${prefix}createGame to create a new game.**`, true));
+            message.channel.send(util.sendMessage(`Use ${prefix}createGame to create a new game.`, true));
             return;
         }
 
+        // Check if players are allowed to join
         if (game.players.length === game.maxNumberOfPlayers) {
-            message.channel.send(util.sendMessage(`Max number of players reached!**`, true));
-            message.channel.send(util.sendMessage(`Either change the maximum number of players allowed or sit out for now.**`, true));
+            message.channel.send(util.sendMessage(`Max number of players reached!`, true));
+            message.channel.send(util.sendMessage(`Either change the maximum number of players allowed or sit out for now.`, true));
             return;
         }
 
@@ -100,7 +102,7 @@ commandCollection.push({
         game.players.some((player: Player) => {
             if (player.user === userTag) {
                 // Player has already joined the game
-                message.channel.send(util.sendMessage(`You have already joined the game ${userTag}**`, true));
+                message.channel.send(util.sendMessage(`You have already joined the game ${userTag}`, true));
                 alreadyJoined = true;
             }
         });
@@ -113,6 +115,32 @@ commandCollection.push({
         }
 
         game.players.push(player);
-        message.channel.send(util.sendMessage(`${userTag} has joined! [${game.players.length}/${game.maxNumberOfPlayers}]**`, true))
+        message.channel.send(util.sendMessage(`${userTag} has joined! [${game.players.length}/${game.maxNumberOfPlayers}]`, true));
+    }
+});
+
+commandCollection.push({
+    command: "leave",
+    description: "Leave the current game",
+    response: (client: Client, message: Message) => {
+        if (game === null) {
+            message.channel.send(util.sendMessage(`Cannot leave game: no game is active.`, true));
+            message.channel.send(util.sendMessage(`Use ${prefix}createGame to create a new game.`, true));
+            return;
+        }
+
+        const userTag = message.author.tag;
+        let leftGame: boolean = false;
+        game.players.forEach((player: Player, index: number) => {
+            if (player.user === userTag) {
+                game!.players.splice(index, 1);
+                leftGame = true;
+            }
+        });
+
+        if (leftGame)
+            message.channel.send(util.sendMessage(`${message.author.tag} has left! [${game.players.length}/${game.maxNumberOfPlayers}]`, true));
+        else
+            message.channel.send(util.sendMessage(`You are not currently in the game ${message.author.tag}!`, true));
     }
 });
