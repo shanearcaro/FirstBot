@@ -26,7 +26,7 @@ commandCollection.push({
 // === In Person Among Us Commands Below ===
 commandCollection.push({
     command: "create",
-    description: "Create an Among Us Game, Arguments: MaxNumberOfPlayers, NumberOfShortTasks, NumberOfCommonTasks, NumberOfLongTasks, NumberOfModerators, NumberOfIMPOSTERs",
+    description: "Create an Among Us Game",
     isDMable: false,
     response: (client: Client, message: Message, isDM: boolean) => {
         if (isDM) {
@@ -60,12 +60,13 @@ commandCollection.push({
         Number of Imposters: ${game.numberOfImposters}`));
 
         message.channel.send(util.sendMessage(`Type ${prefix}join to join now`));
+        message.channel.send(util.sendMessage(`Use ${prefix}help for a list of available commands.`));
     }
 });
 
 commandCollection.push({
     command: "edit",
-    description: "Edit Among Us Game settings",
+    description: "Edit game settings. Only the creator of the game can use this command.",
     isDMable: false,
     response: (client: Client, message: Message, isDM: boolean) => {
         if (isDM) {
@@ -111,7 +112,7 @@ commandCollection.push({
 
 commandCollection.push({
     command: "join",
-    description: "Join an AmongUs game",
+    description: "Join the game.",
     isDMable: false,
     response: (client: Client, message: Message, isDM: boolean) => {
         if (isDM) {
@@ -174,7 +175,7 @@ commandCollection.push({
 
 commandCollection.push({
     command: "leave",
-    description: "Leave the current game",
+    description: "Leave the current game.",
     isDMable: false,
     response: (client: Client, message: Message, isDM: boolean) => {
         if (isDM) {
@@ -219,7 +220,7 @@ commandCollection.push({
 
 commandCollection.push({
     command: "stop",
-    description: "Terminate the current game",
+    description: "Stop the current game. Only the creator of the game can use this command.",
     isDMable: false,
     response: (client: Client, message: Message, isDM: boolean) => {
         if (isDM) {
@@ -251,7 +252,7 @@ commandCollection.push({
 
 commandCollection.push({
     command: "mod",
-    description: "Become a game moderator",
+    description: "Become a game moderator.",
     isDMable: false,
     response: (client: Client, message: Message, isDM: boolean) => {
         if (isDM) {
@@ -318,7 +319,7 @@ commandCollection.push({
 
 commandCollection.push({
     command: "start",
-    description: "Start the game",
+    description: "Start the game. Only the creator of the game can use this command.",
     isDMable: false,
     response: (client: Client, message: Message, isDM: boolean) => {
         if (isDM) {
@@ -429,7 +430,7 @@ commandCollection.push({
 
 commandCollection.push({
     command: "done",
-    description: "Finished a task",
+    description: "Mark a task as complete.",
     isDMable: false,
     response: (client: Client, message: Message, isDM: boolean) => {
         if (isDM) {
@@ -480,7 +481,7 @@ commandCollection.push({
 
 commandCollection.push({
     command: "dead",
-    description: "Describe a player as dead",
+    description: "Mark players as dead. Only moderators and imposters can use this command.",
     isDMable: true,
     response: (client: Client, message: Message, isDM: boolean) => {
         if (!isDM) {
@@ -570,6 +571,74 @@ commandCollection.push({
                     message.channel.send(`Command used improperly! Use ${prefix}dead [number] for the corresponding player`)
                 }
             }
+        });
+    }
+});
+
+commandCollection.push({
+    command: "report",
+    description: "Report a dead body",
+    isDMable: false,
+    response: (client: Client, message: Message, isDM: boolean) => {
+        if (isDM) {
+            client.users.fetch(message.author.id).then((user: User) => {
+                user.send(util.sendMessage(`Your cannot direct message this command`));
+            });
+            return;
+        }
+
+        if (game === null) {
+            message.channel.send(util.sendMessage(`Cannot report a body: no game is active.`));
+            message.channel.send(util.sendMessage(`Use ${prefix}create to create a new game.`));
+            return;
+        }
+        game!.players.forEach((player: Player) => {
+            client.users.fetch(player.id).then((user: User) => {
+                user.send(util.sendMessage(`A BODY HAS BEEN REPORTED!`));
+                user.send(util.sendMessage(`STOP WHAT YOU'RE DOING AND GO TO THE MEETING AREA`));
+            });
+        });
+        message.channel.send(util.sendMessage(`A BODY HAS BEEN REPORTED!`));
+        message.channel.send(util.sendMessage(`STOP WHAT YOU'RE DOING AND GO TO THE MEETING AREA`));
+    }
+});
+
+commandCollection.push({
+    command: "meeting",
+    description: "Call an emergency meeting",
+    isDMable: false,
+    response: (client: Client, message: Message, isDM: boolean) => {
+        if (isDM) {
+            client.users.fetch(message.author.id).then((user: User) => {
+                user.send(util.sendMessage(`Your cannot direct message this command`));
+            });
+            return;
+        }
+
+        if (game === null) {
+            message.channel.send(util.sendMessage(`Cannot call a meeting: no game is active.`));
+            message.channel.send(util.sendMessage(`Use ${prefix}create to create a new game.`));
+            return;
+        }
+        game!.players.forEach((player: Player) => {
+            client.users.fetch(player.id).then((user: User) => {
+                user.send(util.sendMessage(`AN EMERGENCY MEETING HAS BEEN CALLED!`));
+                user.send(util.sendMessage(`STOP WHAT YOU'RE DOING AND GO TO THE MEETING AREA`));
+            });
+        });
+        message.channel.send(util.sendMessage(`AN EMERGENCY MEETING HAS BEEN CALLED!`));
+        message.channel.send(util.sendMessage(`STOP WHAT YOU'RE DOING AND GO TO THE MEETING AREA`));
+        
+    }
+});
+
+commandCollection.push({
+    command: "help",
+    description: "List all available commands",
+    isDMable: true,
+    response: (client: Client, message: Message, isDM: boolean) => {
+        commandCollection.forEach((command: Command, index: number) => {
+            message.channel.send(util.sendMessage(`**${prefix}${command.command}:** ${command.description}\n`, false));
         });
     }
 });
