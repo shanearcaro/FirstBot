@@ -3,7 +3,7 @@ import { AmongUs, Player, roles} from "../amongus";
 import { Command } from "./commands";
 import * as util from "../utils"
 import { Channel } from "diagnostics_channel";
-const { prefix } = require("../../config/config.json");
+const { prefix } = require("../../config/config");
 
 export const commandCollection: Command[] = [];
 let game: AmongUs | null = null;

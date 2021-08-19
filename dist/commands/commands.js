@@ -22,7 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.replyMessage = void 0;
 var commandCollection_1 = require("./commandCollection");
 var util = __importStar(require("../utils"));
-var prefix = require("../config").prefix;
+var prefix = require("../../config/config").prefix;
 function replyMessage(client, message, isDM) {
     if (isDM === void 0) { isDM = false; }
     var content = message.content;

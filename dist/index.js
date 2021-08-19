@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var discord_js_1 = require("discord.js");
 var commands_1 = require("./commands/commands");
-var token = require("../src/config").token;
+var token = require("../config/config.json").token;
 // const client = new Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
 var client = new discord_js_1.Client({
     intents: ["GUILDS", "GUILD_MESSAGES", "DIRECT_MESSAGES"],

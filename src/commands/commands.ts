@@ -1,7 +1,7 @@
 import { Message, Client } from "discord.js"
 import { commandCollection } from "./commandCollection";
 import * as util from "../utils";
-const { prefix } = require("../../config/config.json");
+const { prefix } = require("../../config/config");
 
 export type Command = {
     command: string,

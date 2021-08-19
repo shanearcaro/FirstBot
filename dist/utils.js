@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendMessage = exports.stringArrayToNumberArray = exports.getArgumentsAsString = exports.getArgumentsAsArray = exports.getCommand = exports.startsWithPrefix = void 0;
-var prefix = require("../src/config").prefix;
+var prefix = require("../config/config").prefix;
 var prepend = "🔥 ";
 var bold = "**";
 var italicize = "*";

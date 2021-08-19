@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-const { prefix } = require("../../config/config.json");
+const { prefix } = require("../config/config");
 const prepend: string = "🔥 ";
 const bold: string = "**";
 const italicize: string = "*";

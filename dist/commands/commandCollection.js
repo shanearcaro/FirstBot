@@ -22,7 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.commandCollection = void 0;
 var amongus_1 = require("../amongus");
 var util = __importStar(require("../utils"));
-var prefix = require("../config").prefix;
+var prefix = require("../../config/config").prefix;
 exports.commandCollection = [];
 var game = null;
 var gameHost = "";
