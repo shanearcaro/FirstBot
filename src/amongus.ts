@@ -6,7 +6,7 @@ export class AmongUs {
     public totalTaskCount: number = 0;
     public constructor(public maxNumberOfPlayers: number = GAME_DEFAULTS.MAXPLAYERS, public numberOfShortTasks: number = GAME_DEFAULTS.SHORTTASKS, 
         public numberOfCommonTasks: number = GAME_DEFAULTS.COMMONTASKS, public numberOfLongTasks: number = GAME_DEFAULTS.LONGTASKS, 
-        public numberOfModerators: number = GAME_DEFAULTS.MODERATORS, public numberOfImpostors: number = GAME_DEFAULTS.IMPOSTORS) {
+        public numberOfModerators: number = GAME_DEFAULTS.MODERATORS, public numberOfImposters: number = GAME_DEFAULTS.IMPOSTERS) {
             // this.checkProblems();
     }
 
@@ -18,7 +18,7 @@ export class AmongUs {
             this.numberOfCommonTasks = numberOfCommonTasks ?? this.numberOfCommonTasks;
             this.numberOfLongTasks = numberOfLongTasks ?? this.numberOfLongTasks;
             this.numberOfModerators = numberOfModerators ?? this.numberOfModerators;
-            this.numberOfImpostors = numberOfImpostors ?? this.numberOfImpostors;
+            this.numberOfImposters = numberOfImpostors ?? this.numberOfImposters;
             this.checkProblems();
             this.calculateTaskCount();
     }
@@ -29,12 +29,12 @@ export class AmongUs {
         if (this.numberOfCommonTasks < 0) this.numberOfCommonTasks = GAME_DEFAULTS.COMMONTASKS;
         if (this.numberOfLongTasks < 0) this.numberOfLongTasks = GAME_DEFAULTS.LONGTASKS;
         if (this.numberOfModerators < 0) this.numberOfModerators = GAME_DEFAULTS.MODERATORS;
-        if (this.numberOfImpostors < 0) this.numberOfImpostors = GAME_DEFAULTS.IMPOSTORS;
+        if (this.numberOfImposters < 0) this.numberOfImposters = GAME_DEFAULTS.IMPOSTERS;
         this.calculateTaskCount();
     }
 
     calculateTaskCount(): void {
-        let playerCount = this.maxNumberOfPlayers - this.numberOfImpostors - this.numberOfModerators;
+        let playerCount = this.maxNumberOfPlayers - this.numberOfImposters - this.numberOfModerators;
         let taskCount = this.numberOfShortTasks + this.numberOfCommonTasks + this.numberOfLongTasks;
 
         this.totalTaskCount = playerCount * taskCount;
@@ -59,5 +59,5 @@ export type Task = {
 }
 
 enum taskLength { SHORT, COMMON, LONG };
-enum GAME_DEFAULTS { MAXPLAYERS = 10, SHORTTASKS = 3, COMMONTASKS = 2, LONGTASKS = 1, MODERATORS = 1, IMPOSTORS = 2 };
-export enum roles { PLAYER, IMPOSTOR, MOD }; 
+enum GAME_DEFAULTS { MAXPLAYERS = 10, SHORTTASKS = 3, COMMONTASKS = 2, LONGTASKS = 1, MODERATORS = 1, IMPOSTERS = 2 };
+export enum roles { PLAYER, IMPOSTER, MOD }; 

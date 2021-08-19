@@ -1,7 +1,8 @@
-import { Client, Message, User } from "discord.js";
+import { Client, Message, TextBasedChannels, User, UserFlags, UserFlagsString } from "discord.js";
 import { AmongUs, Player, roles} from "../amongus";
 import { Command } from "./commands";
 import * as util from "../utils"
+import { Channel } from "diagnostics_channel";
 const { prefix } = require("../config");
 
 export const commandCollection: Command[] = [];
@@ -9,6 +10,7 @@ let game: AmongUs | null = null;
 let gameHost: string = "";
 let gameHostName: string = "";
 let gameStarted: boolean = false;
+let gameChannel: TextBasedChannels;
 
 // Shutdown command
 commandCollection.push({
@@ -24,7 +26,7 @@ commandCollection.push({
 // === In Person Among Us Commands Below ===
 commandCollection.push({
     command: "create",
-    description: "Create an Among Us Game, Arguments: MaxNumberOfPlayers, NumberOfShortTasks, NumberOfCommonTasks, NumberOfLongTasks, NumberOfModerators, NumberOfImpostors",
+    description: "Create an Among Us Game, Arguments: MaxNumberOfPlayers, NumberOfShortTasks, NumberOfCommonTasks, NumberOfLongTasks, NumberOfModerators, NumberOfIMPOSTERs",
     isDMable: false,
     response: (client: Client, message: Message, isDM: boolean) => {
         if (isDM) {
@@ -41,6 +43,7 @@ commandCollection.push({
         }
 
         game = new AmongUs();
+        gameChannel = message.channel;
         const args = util.getArgumentsAsArray(message);
 
         if (!(args.length === 1 && args[0] === ""))
@@ -54,7 +57,7 @@ commandCollection.push({
         Number of Common Tasks: ${game.numberOfCommonTasks}
         Number of Long Tasks: ${game.numberOfLongTasks}
         Number of Moderators: ${game.numberOfModerators}
-        Number of Impostors: ${game.numberOfImpostors}`));
+        Number of Imposters: ${game.numberOfImposters}`));
 
         message.channel.send(util.sendMessage(`Type ${prefix}join to join now`));
     }
@@ -102,7 +105,7 @@ commandCollection.push({
         Number of Common Tasks: ${game.numberOfCommonTasks}
         Number of Long Tasks: ${game.numberOfLongTasks}
         Number of Moderators: ${game.numberOfModerators}
-        Number of Impostors: ${game.numberOfImpostors}`));
+        Number of Imposters: ${game.numberOfImposters}`));
     }
 });
 
@@ -343,7 +346,7 @@ commandCollection.push({
             return
         }
 
-        const minimumPlayers: number = game!.numberOfImpostors * 2 + game!.numberOfModerators;
+        const minimumPlayers: number = game!.numberOfImposters * 2 + game!.numberOfModerators;
 
         if (game!.players.length < minimumPlayers) {
             message.channel.send(util.sendMessage(`Cannot start game: minimum players needed: ${minimumPlayers}`));
@@ -384,29 +387,29 @@ commandCollection.push({
             });
         }
 
-        // Randomly choose impostors
+        // Randomly choose IMPOSTERs
         game.players.forEach((player: Player, index: number) => {
             if (player.role != roles.MOD)
                 numbers.push(index);
         })
 
-        for (let i = 0; i < game.numberOfImpostors; i++) {
+        for (let i = 0; i < game.numberOfImposters; i++) {
             let random = Math.trunc(Math.random() * numbers.length)
-            game.players[numbers[random]].role = roles.IMPOSTOR;
+            game.players[numbers[random]].role = roles.IMPOSTER;
             client.users.fetch(game.players[numbers[random]].id).then((user: User) => {
                 user.send(util.sendMessage(`You are the imposter!`));
-                if (game!.numberOfImpostors === 1)
+                if (game!.numberOfImposters === 1)
                     user.send(util.sendMessage(`You have no allies.`));
             });
             numbers.splice(random, 1);
         }
 
-        if (game.numberOfImpostors > 1) {
+        if (game.numberOfImposters > 1) {
             game.players.forEach((player: Player) => {
-                if (player.role === roles.IMPOSTOR) {
+                if (player.role === roles.IMPOSTER) {
                     let otherImposters: string[] = [];
                     game!.players.forEach((imposter: Player) => {
-                        if (imposter.role === roles.IMPOSTOR && imposter.userTag != player.userTag)
+                        if (imposter.role === roles.IMPOSTER && imposter.userTag != player.userTag)
                             otherImposters.push(imposter.nickname);
                     })
                     client.users.fetch(player.id).then((user: User) => {
@@ -448,9 +451,9 @@ commandCollection.push({
         game.players.forEach((player: Player) => {
             if (player.userTag === userTag) {
                 console.log(`${player.nickname} has ${player.completedTasks} completed tasks`)
-                if (player.completedTasks === totalTasks && (player.role == roles.PLAYER || player.role == roles.IMPOSTOR)) 
+                if (player.completedTasks === totalTasks && (player.role == roles.PLAYER || player.role == roles.IMPOSTER)) 
                     message.channel.send(util.sendMessage(`You have already completed all your tasks ${player.nickname}!`));
-                else if (player.role == roles.PLAYER || player.role == roles.IMPOSTOR)
+                else if (player.role == roles.PLAYER || player.role == roles.IMPOSTER)
                     message.channel.send(util.sendMessage(`${player.nickname} has finished [${++player.completedTasks}/${totalTasks}] tasks!`))
                 if (player.role === roles.PLAYER) {
                     game!.finishedTasks++;
@@ -502,16 +505,18 @@ commandCollection.push({
                 if (player.role === roles.PLAYER) {
                     message.channel.send(util.sendMessage(`You are not allowed to mark players as dead.`));
                     message.channel.send(util.sendMessage(`To report a dead body use the ${prefix}report command`))
+                    return;
                 }
                 let gamePlayers: Player[];
+                // gamePlayers doesn't include name of imposter that used the command
                 if (player.role === roles.MOD) {
                     gamePlayers = game!.players.filter((gameP: Player) => {
-                        return !gameP.dead && (gameP.role === roles.PLAYER || gameP.role === roles.IMPOSTOR);
+                        return !gameP.dead && (gameP.role === roles.PLAYER || gameP.role === roles.IMPOSTER);
                     });
                 }
                 else {
                     gamePlayers = game!.players.filter((gameP: Player) => {
-                        return !gameP.dead && gameP.userTag != player.userTag && (gameP.role === roles.PLAYER || gameP.role === roles.IMPOSTOR);
+                        return !gameP.dead && gameP.userTag != player.userTag && (gameP.role === roles.PLAYER || gameP.role === roles.IMPOSTER);
                     });
                 }
                 if (args.length === 1 && args[0] === "") {
@@ -527,7 +532,18 @@ commandCollection.push({
                     game!.players.forEach((gameP: Player) => {
                         if (gameP.userTag === deadPlayer.userTag) {
                             gameP.dead = true;
-                            if (player.role === roles.IMPOSTOR) {
+                            // Player is marked dead, check if game is over
+                            let numberOfPlayers: number = 0;
+                            let numberOfImposters: number = 0;
+                            console.log(`Number of Players: ${numberOfPlayers}, Number of Imposters: ${numberOfImposters}`)
+                            game!.players.forEach((gP: Player) => {
+                                numberOfPlayers += (gP.role === roles.PLAYER && !gP.dead) ? 1 : 0;
+                            });
+                            game!.players.forEach((gP: Player) => {
+                                numberOfImposters += (gP.role === roles.IMPOSTER && !gP.dead) ? 1 : 0;
+                            });
+
+                            if (player.role === roles.IMPOSTER) {
                                 message.channel.send(util.sendMessage(`${gameP.nickname} has now been marked as dead.`));
                             }
                             game!.players.forEach((moderator: Player) => {
@@ -537,6 +553,16 @@ commandCollection.push({
                                     });
                                 }
                             });
+                            
+                            // Game is over
+                            if (numberOfImposters >= numberOfPlayers || numberOfImposters === 0) {
+                                game?.players.forEach((gP: Player) => {
+                                    client.users.fetch(gP.id).then((user: User) => {
+                                        user.send(util.sendMessage(`GAME IS OVER: Imposters win!`))
+                                    });
+                                });
+                                gameChannel.send(util.sendMessage(`GAME IS OVER: Imposters win!`));
+                            }
                         }
                     });
                 }
