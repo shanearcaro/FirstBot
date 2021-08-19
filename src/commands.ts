@@ -6,10 +6,11 @@ const { prefix } = require("../src/config");
 export type Command = {
     command: string,
     description: string,
-    response: (client: Client, message: Message) => void;
+    isDMable: boolean,
+    response: (client: Client, message: Message, isDM: boolean) => void;
 }
 
-export function replyMessage(client: Client, message: Message): void {
+export function replyMessage(client: Client, message: Message, isDM: boolean = false): void {
     const { content } = message;
 
     // If message is not a command do not reply
@@ -24,7 +25,7 @@ export function replyMessage(client: Client, message: Message): void {
         if (cmd.command.toLowerCase() === messageCommand.toLowerCase()) {
             console.log(`Responding to: ${message.content}`)
             console.log();
-            cmd.response(client, message);
+            cmd.response(client, message, isDM);
         }
     });
 }

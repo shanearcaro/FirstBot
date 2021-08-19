@@ -8,12 +8,14 @@ export const commandCollection: Command[] = [];
 let game: AmongUs | null = null;
 let gameHost: string = "";
 let gameHostName: string = "";
+let gameStarted: boolean = false;
 
 // Shutdown command
 commandCollection.push({
     command: "shutdown",
     description: "Shut down the bot",
-    response: (client: Client, message: Message) => {
+    isDMable: false,
+    response: (client: Client, message: Message, isDM: boolean) => {
         message.channel.send(`User ${client.user?.tag} is shutting down.`);
         client.destroy();
     }
@@ -23,7 +25,14 @@ commandCollection.push({
 commandCollection.push({
     command: "create",
     description: "Create an Among Us Game, Arguments: MaxNumberOfPlayers, NumberOfShortTasks, NumberOfCommonTasks, NumberOfLongTasks, NumberOfModerators, NumberOfImpostors",
-    response: (client: Client, message: Message) => {
+    isDMable: false,
+    response: (client: Client, message: Message, isDM: boolean) => {
+        if (isDM) {
+            client.users.fetch(message.author.id).then((user: User) => {
+                user.send(util.sendMessage(`Your cannot direct message this command`));
+            });
+            return;
+        }
         // Check if game exists
         if (game !== null) {
             message.channel.send(util.sendMessage("A game has already been created"));
@@ -54,7 +63,15 @@ commandCollection.push({
 commandCollection.push({
     command: "edit",
     description: "Edit Among Us Game settings",
-    response: (client: Client, message: Message) => {
+    isDMable: false,
+    response: (client: Client, message: Message, isDM: boolean) => {
+        if (isDM) {
+            client.users.fetch(message.author.id).then((user: User) => {
+                user.send(util.sendMessage(`Your cannot direct message this command`));
+            });
+            return;
+        }
+
         // Check if game exists
         if (game === null) {
             message.channel.send(util.sendMessage("Cannot change values: no game is active"));
@@ -67,6 +84,11 @@ commandCollection.push({
         if (gameHost !== userTag) {
             message.channel.send(util.sendMessage(`Cannot edit game: you are not the creator`));
             message.channel.send(util.sendMessage(`${gameHostName} has permission to edit the game.`));
+            return
+        }
+
+        if (gameStarted) {
+            message.channel.send(util.sendMessage(`Cannot edit game: game has already started`));
             return
         }
 
@@ -86,7 +108,15 @@ commandCollection.push({
 commandCollection.push({
     command: "join",
     description: "Join an AmongUs game",
-    response: (client: Client, message: Message) => {
+    isDMable: false,
+    response: (client: Client, message: Message, isDM: boolean) => {
+        if (isDM) {
+            client.users.fetch(message.author.id).then((user: User) => {
+                user.send(util.sendMessage(`Your cannot direct message this command`));
+            });
+            return;
+        }
+
         // Check if game exists
         if (game === null) {
             message.channel.send(util.sendMessage(`Cannot join game: no game is active.`));
@@ -101,6 +131,11 @@ commandCollection.push({
             return;
         }
 
+        if (gameStarted) {
+            message.channel.send(util.sendMessage(`Cannot join game: game has already started`));
+            return
+        }
+
         const userTag: string = message.author.tag;
         const username: string = message.author.username;
         const userID: string = message.author.id;
@@ -108,9 +143,9 @@ commandCollection.push({
 
         let alreadyJoined: boolean = false;
         game.players.some((player: Player) => {
-            if (player.user === userTag) {
+            if (player.userTag === userTag) {
                 // Player has already joined the game
-                message.channel.send(util.sendMessage(`You have already joined the game ${username}`));
+                message.channel.send(util.sendMessage(`You have already joined the game ${player.nickname}`));
                 alreadyJoined = true;
             }
         });
@@ -119,25 +154,42 @@ commandCollection.push({
             return;
 
         let player: Player = {
-            user: userTag,
+            userTag: userTag,
             nickname: nickname,
             id: userID,
-            role: roles.PLAYER
+            role: roles.PLAYER,
+            completedTasks: 0,
+            dead: false,
+            tasks: []
         }
 
         game.players.push(player);
-        message.channel.send(util.sendMessage(`${username} has joined! [${game.players.length}/${game.maxNumberOfPlayers}]`));
+        message.channel.send(util.sendMessage(`${player.nickname} has joined! [${game.players.length}/${game.maxNumberOfPlayers}]`));
     }
 });
 
 commandCollection.push({
     command: "leave",
     description: "Leave the current game",
-    response: (client: Client, message: Message) => {
+    isDMable: false,
+    response: (client: Client, message: Message, isDM: boolean) => {
+        if (isDM) {
+            client.users.fetch(message.author.id).then((user: User) => {
+                user.send(util.sendMessage(`Your cannot direct message this command`));
+            });
+            return;
+        }
+
         if (game === null) {
             message.channel.send(util.sendMessage(`Cannot leave game: no game is active.`));
             message.channel.send(util.sendMessage(`Use ${prefix}create to create a new game.`));
             return;
+        }
+
+        if (gameStarted) {
+            message.channel.send(util.sendMessage(`Cannot leave game: game has already started`));
+            message.channel.send(util.sendMessage(`You wouldn't want to abandon your friends, would you?`));
+            return
         }
 
         const userTag: string = message.author.tag;
@@ -145,7 +197,7 @@ commandCollection.push({
         const nickname: string = message.member?.nickname ?? username;
         let leftGame: boolean = false;
         game.players.forEach((player: Player, index: number) => {
-            if (player.user === userTag) {
+            if (player.userTag === userTag) {
                 game!.players.splice(index, 1);
                 leftGame = true;
                 // If player is a mod decrease the count
@@ -164,7 +216,15 @@ commandCollection.push({
 commandCollection.push({
     command: "stop",
     description: "Terminate the current game",
-    response: (client: Client, message: Message) => {
+    isDMable: false,
+    response: (client: Client, message: Message, isDM: boolean) => {
+        if (isDM) {
+            client.users.fetch(message.author.id).then((user: User) => {
+                user.send(util.sendMessage(`Your cannot direct message this command`));
+            });
+            return;
+        }
+
         if (game === null) {
             message.channel.send(util.sendMessage(`Cannot stop game: no game is active.`));
             message.channel.send(util.sendMessage(`Use ${prefix}create to create a new game.`));
@@ -180,6 +240,7 @@ commandCollection.push({
         }
 
         game = null;
+        gameStarted = false;
         message.channel.send(util.sendMessage(`Current Among Us game has been terminated.`));
     }
 });
@@ -187,11 +248,24 @@ commandCollection.push({
 commandCollection.push({
     command: "mod",
     description: "Become a game moderator",
-    response: (client: Client, message: Message) => {
+    isDMable: false,
+    response: (client: Client, message: Message, isDM: boolean) => {
+        if (isDM) {
+            client.users.fetch(message.author.id).then((user: User) => {
+                user.send(util.sendMessage(`Your cannot direct message this command`));
+            });
+            return;
+        }
+
         if (game === null) {
             message.channel.send(util.sendMessage(`Cannot join moderators: no game is active.`));
             message.channel.send(util.sendMessage(`Use ${prefix}create to create a new game.`));
             return;
+        }
+
+        if (gameStarted) {
+            message.channel.send(util.sendMessage(`Cannot join moderators: game has already started`));
+            return
         }
 
         const userTag: string = message.author.tag;
@@ -199,7 +273,7 @@ commandCollection.push({
         const nickname: string = message.member?.nickname ?? username;
         let playerJoined: boolean = false;
         game.players.forEach((player: Player) => {
-            if (player.user === userTag)
+            if (player.userTag === userTag)
                 playerJoined = true;
         });
 
@@ -219,7 +293,7 @@ commandCollection.push({
         // If player is already a moderator
         let alreadyMod: boolean = false;
         game.players.forEach((player: Player) => {
-            if (player.user === userTag) {
+            if (player.userTag === userTag) {
                 if (player.role === roles.MOD)
                     alreadyMod = true;
                 else {
@@ -241,7 +315,15 @@ commandCollection.push({
 commandCollection.push({
     command: "start",
     description: "Start the game",
-    response: (client: Client, message: Message) => {
+    isDMable: false,
+    response: (client: Client, message: Message, isDM: boolean) => {
+        if (isDM) {
+            client.users.fetch(message.author.id).then((user: User) => {
+                user.send(util.sendMessage(`Your cannot direct message this command`));
+            });
+            return;
+        }
+
         if (game === null) {
             message.channel.send(util.sendMessage(`Cannot start game: no game is active.`));
             message.channel.send(util.sendMessage(`Use ${prefix}create to create a new game.`));
@@ -254,6 +336,11 @@ commandCollection.push({
         if (gameHost !== userTag) {
             message.channel.send(util.sendMessage(`Cannot start game: you are not the creator`));
             message.channel.send(util.sendMessage(`${gameHostName} has permission to start the game.`));
+            return
+        }
+
+        if (gameStarted) {
+            message.channel.send(util.sendMessage(`Cannot start game: game has already started`));
             return
         }
 
@@ -277,6 +364,10 @@ commandCollection.push({
                 let random = Math.trunc(Math.random() * numbers.length)
                 game.players[numbers[random]].role = roles.MOD;
                 message.channel.send(util.sendMessage(`${game.players[numbers[random]].nickname} has been picked as a morderator.`))
+                client.users.fetch(game.players[numbers[random]].id).then((user: User) => {
+                    user.send(util.sendMessage(`You are a game moderator!`));
+                    user.send(util.sendMessage(`Watch out for game alerts from the bot.`));
+                });
                 numbers.splice(random, 1); 
             }
             numbers = [];
@@ -304,7 +395,7 @@ commandCollection.push({
                 if (player.role === roles.IMPOSTOR) {
                     let otherImposters: string[] = [];
                     game!.players.forEach((imposter: Player) => {
-                        if (imposter.role === roles.IMPOSTOR && imposter.user != player.user)
+                        if (imposter.role === roles.IMPOSTOR && imposter.userTag != player.userTag)
                             otherImposters.push(imposter.nickname);
                     })
                     client.users.fetch(player.id).then((user: User) => {
@@ -313,8 +404,70 @@ commandCollection.push({
                 }
             });
         }
+        gameStarted = true;
         message.channel.send(util.sendMessage(`The game has now started, good luck!`));
 
         // Assign players roles and tasks
+    }
+});
+
+commandCollection.push({
+    command: "done",
+    description: "Finished a task",
+    isDMable: false,
+    response: (client: Client, message: Message, isDM: boolean) => {
+        if (isDM) {
+            client.users.fetch(message.author.id).then((user: User) => {
+                user.send(util.sendMessage(`Your cannot direct message this command`));
+            });
+            return;
+        }
+
+        if (game === null) {
+            message.channel.send(util.sendMessage(`Cannot finish task: no game is active.`));
+            message.channel.send(util.sendMessage(`Use ${prefix}create to create a new game.`));
+            return;
+        }
+
+        const totalTasks: number = game?.numberOfShortTasks! + game?.numberOfCommonTasks! + game?.numberOfLongTasks!;
+        const userTag: string = message.author.tag;
+        const username: string = message.author.username;
+
+        game.players.forEach((player: Player) => {
+            if (player.userTag === userTag) {
+                console.log(`${player.nickname} has ${player.completedTasks} completed tasks`)
+                if (player.completedTasks === totalTasks && (player.role == roles.PLAYER || player.role == roles.IMPOSTOR)) 
+                    message.channel.send(util.sendMessage(`You have already completed all your tasks ${player.nickname}!`));
+                else if (player.role == roles.PLAYER || player.role == roles.IMPOSTOR)
+                    message.channel.send(util.sendMessage(`${player.nickname} has finished [${++player.completedTasks}/${totalTasks}] tasks!`))
+                if (player.role === roles.PLAYER) {
+                    game!.finishedTasks++;
+                    console.log(`FINISHED TASKS: ${game?.finishedTasks}`);
+                    if (game!.finishedTasks === game!.totalTaskCount) {
+                        // Game is over innocents win
+                        game?.players.forEach((player: Player) => {
+                            client.users.fetch(player.id).then((user: User) => {
+                                user.send(util.sendMessage(`GAME IS OVER: Innocents Win!`))
+                            });
+                        });
+                        message.channel.send(util.sendMessage(`GAME IS OVER: Innocents Win!`));
+                        game = null;
+                        gameStarted = false;
+                    }
+                }
+                if (player.role === roles.MOD) {
+                    message.channel.send(util.sendMessage(`You cannot finish tasks, you are a moderator.`));
+                }
+            }
+        });
+    }
+});
+
+commandCollection.push({
+    command: "dead",
+    description: "Describe a player as dead",
+    isDMable: true,
+    response: (client: Client, message: Message, isDM: boolean) => {
+ 
     }
 });

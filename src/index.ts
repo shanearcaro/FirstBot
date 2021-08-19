@@ -16,7 +16,7 @@ client.once('ready', () => {
 // Respond to commands sent within a discord server
 client.on('messageCreate', (message: Message) => {
 	console.log(`Received message: ${message.content}`);
-	replyMessage(client, message);
+	replyMessage(client, message, message.channel.type === "DM");
 
 });
 
