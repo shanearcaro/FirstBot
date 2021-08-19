@@ -1,7 +1,7 @@
 import Discord, { Client, Message, Intents } from "discord.js";
 import { replyMessage } from "./commands/commands";
 import * as AmongUs from "./amongus";
-const { token } = require("../src/config");
+const { token } = require("../../config/config.json");
 
 // const client = new Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
 const client = new Client({ 
