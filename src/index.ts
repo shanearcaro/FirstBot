@@ -1,5 +1,5 @@
 import Discord, { Client, Message, Intents } from "discord.js";
-import { replyMessage } from "./commands";
+import { replyMessage } from "./commands/commands";
 import * as AmongUs from "./amongus";
 const { token } = require("../src/config");
 
