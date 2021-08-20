@@ -37,16 +37,15 @@ var gameHostName = "";
 var gameStarted = false;
 var gameChannel;
 // Shutdown command
-exports.commandCollection.push({
-    command: "shutdown",
-    description: "Shut down the bot",
-    isDMable: false,
-    response: function (client, message, isDM) {
-        var _a;
-        message.channel.send("User " + ((_a = client.user) === null || _a === void 0 ? void 0 : _a.tag) + " is shutting down.");
-        client.destroy();
-    }
-});
+// commandCollection.push({
+//     command: "shutdown",
+//     description: "Shut down the bot",
+//     isDMable: false,
+//     response: (client: Client, message: Message, isDM: boolean) => {
+//         message.channel.send(`User ${client.user?.tag} is shutting down.`);
+//         client.destroy();
+//     }
+// });
 // === In Person Among Us Commands Below ===
 exports.commandCollection.push({
     command: "create",
