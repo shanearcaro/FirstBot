@@ -1,17 +1,24 @@
 const gameTasks = require("../tasks/task");
 let taskList: Task[];
 
+export let maxShortTasks: number = 0;
+export let maxCommonTasks: number = 0;
+export let maxLongTasks: number = 0;
+
+
 export class AmongUs {
     public players: Player[] = [];
     public currentMods: number = 0;
     public killedPlayers: number = 0;
     public finishedTasks: number = 0;
     public totalTaskCount: number = 0;
+
     public constructor(public maxNumberOfPlayers: number = GAME_DEFAULTS.MAXPLAYERS, public numberOfShortTasks: number = GAME_DEFAULTS.SHORTTASKS, 
         public numberOfCommonTasks: number = GAME_DEFAULTS.COMMONTASKS, public numberOfLongTasks: number = GAME_DEFAULTS.LONGTASKS, 
         public numberOfModerators: number = GAME_DEFAULTS.MODERATORS, public numberOfImposters: number = GAME_DEFAULTS.IMPOSTERS) {
             this.checkProblems();
             taskList = getTasks();
+            console.log(`Task List: ${taskList}`);
     }
 
     // Set 
@@ -75,7 +82,7 @@ function createTask(name: string, description: string, room: string, duration: t
     }
 }
 
-function convertTask(length: string): taskLength {
+function convertStringToTask(length: string): taskLength {
     if (length === "SHORT")
         return taskLength.SHORT;
     else if (length === "COMMON")
@@ -83,10 +90,24 @@ function convertTask(length: string): taskLength {
     return taskLength.LONG;
 }
 
+export function convertTaskToString(length: taskLength): string {
+    if (length === taskLength.SHORT)
+        return "Short";
+    else if (length === taskLength.COMMON)
+        return "Common";
+    return "Long";
+}
+
 function getTasks(): Task[] {
     let tasks: Task[] = [];
     for (let i in gameTasks) {
-        let task = createTask(gameTasks[i].name, gameTasks[i].description, gameTasks[i].room, convertTask(gameTasks[i].duration));
+        let task = createTask(gameTasks[i].name, gameTasks[i].description, gameTasks[i].room, convertStringToTask(gameTasks[i].duration));
+        if (task.duration == taskLength.SHORT)
+            maxShortTasks++;
+        else if (task.duration == taskLength.COMMON)
+            maxCommonTasks++;
+        else
+            maxLongTasks++;
         tasks.push(task);
     }
     return tasks;
@@ -94,8 +115,15 @@ function getTasks(): Task[] {
 
 export function randomTasks(amount: number, duration: taskLength): Task[] | null {
     let randTasks: Task[] = [];
-    let tasks: Task[] = taskList.filter((task: Task) => {
-        task.duration = duration;
+
+    taskList.forEach((task: Task) => {
+        console.log(`${task.name}, ${task.description}, ${task.room}, ${task.duration}`);
+    });
+
+    let tasks: Task[] = [];
+    taskList.forEach((task: Task) => {
+        if (task.duration === duration)
+            tasks.push(task);
     });
 
     if (amount > tasks.length)
