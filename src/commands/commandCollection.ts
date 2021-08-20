@@ -471,6 +471,11 @@ commandCollection.push({
             return;
         }
 
+        if (!gameStarted) {
+            message.channel.send(util.sendMessage(`Cannot finish task: game is not started`));
+            return
+        }
+
         const totalTasks: number = game?.numberOfShortTasks! + game?.numberOfCommonTasks! + game?.numberOfLongTasks!;
         const userTag: string = message.author.tag;
 
@@ -523,6 +528,11 @@ commandCollection.push({
             message.channel.send(util.sendMessage(`Cannot use command: no game is active.`));
             message.channel.send(util.sendMessage(`Use ${prefix}create to create a new game.`));
             return;
+        }
+
+        if (!gameStarted) {
+            message.channel.send(util.sendMessage(`Cannot mark players as dead: game is not started`));
+            return
         }
 
         const args = util.getArgumentsAsArray(message);
@@ -617,6 +627,12 @@ commandCollection.push({
             message.channel.send(util.sendMessage(`Use ${prefix}create to create a new game.`));
             return;
         }
+
+        if (!gameStarted) {
+            message.channel.send(util.sendMessage(`Cannot report body: game is not started`));
+            return
+        }
+
         game!.players.forEach((player: Player) => {
             client.users.fetch(player.id).then((user: User) => {
                 user.send(util.sendMessage(`A BODY HAS BEEN REPORTED!`));
@@ -645,6 +661,12 @@ commandCollection.push({
             message.channel.send(util.sendMessage(`Use ${prefix}create to create a new game.`));
             return;
         }
+
+        if (!gameStarted) {
+            message.channel.send(util.sendMessage(`Cannot call a meeting: game is not started`));
+            return
+        }
+
         game!.players.forEach((player: Player) => {
             client.users.fetch(player.id).then((user: User) => {
                 user.send(util.sendMessage(`AN EMERGENCY MEETING HAS BEEN CALLED!`));
