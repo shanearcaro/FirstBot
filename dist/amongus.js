@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.roles = exports.AmongUs = void 0;
+exports.randomTasks = exports.roles = exports.taskLength = exports.AmongUs = void 0;
+var gameTasks = require("../tasks/task");
+var taskList;
 var AmongUs = /** @class */ (function () {
     function AmongUs(maxNumberOfPlayers, numberOfShortTasks, numberOfCommonTasks, numberOfLongTasks, numberOfModerators, numberOfImposters) {
         if (maxNumberOfPlayers === void 0) { maxNumberOfPlayers = GAME_DEFAULTS.MAXPLAYERS; }
@@ -20,7 +22,8 @@ var AmongUs = /** @class */ (function () {
         this.killedPlayers = 0;
         this.finishedTasks = 0;
         this.totalTaskCount = 0;
-        // this.checkProblems();
+        this.checkProblems();
+        taskList = getTasks();
     }
     // Set 
     AmongUs.prototype.setValues = function (maxNumberOfPlayers, numberOfShortTasks, numberOfCommonTasks, numberOfLongTasks, numberOfModerators, numberOfImpostors) {
@@ -61,7 +64,7 @@ var taskLength;
     taskLength[taskLength["SHORT"] = 0] = "SHORT";
     taskLength[taskLength["COMMON"] = 1] = "COMMON";
     taskLength[taskLength["LONG"] = 2] = "LONG";
-})(taskLength || (taskLength = {}));
+})(taskLength = exports.taskLength || (exports.taskLength = {}));
 ;
 var GAME_DEFAULTS;
 (function (GAME_DEFAULTS) {
@@ -80,3 +83,41 @@ var roles;
     roles[roles["MOD"] = 2] = "MOD";
 })(roles = exports.roles || (exports.roles = {}));
 ;
+function createTask(name, description, room, duration) {
+    return {
+        name: name,
+        description: description,
+        room: room,
+        duration: duration
+    };
+}
+function convertTask(length) {
+    if (length === "SHORT")
+        return taskLength.SHORT;
+    else if (length === "COMMON")
+        return taskLength.COMMON;
+    return taskLength.LONG;
+}
+function getTasks() {
+    var tasks = [];
+    for (var i in gameTasks) {
+        var task = createTask(gameTasks[i].name, gameTasks[i].description, gameTasks[i].room, convertTask(gameTasks[i].duration));
+        tasks.push(task);
+    }
+    return tasks;
+}
+function randomTasks(amount, duration) {
+    var randTasks = [];
+    var tasks = taskList.filter(function (task) {
+        task.duration = duration;
+    });
+    if (amount > tasks.length)
+        return null;
+    for (var i = 0; i < amount; i++) {
+        var random = Math.trunc(Math.random() * tasks.length);
+        randTasks.push(tasks[random]);
+        tasks.splice(random, 1);
+    }
+    return randTasks;
+}
+exports.randomTasks = randomTasks;

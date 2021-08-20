@@ -153,6 +153,17 @@ exports.commandCollection.push({
             completedTasks: 0,
             dead: false,
             tasks: []
+            /**
+                Having problems with tasks being generated corretly
+                Something with the tasks array not being initialized
+                even though the game is initialized [amongus.ts]
+                Too tired to fix it right now, fix tomorrow
+            */
+            /**
+            [...randomTasks(game.numberOfShortTasks, taskLength.SHORT)!,
+            ...randomTasks(game.numberOfCommonTasks, taskLength.COMMON)!,
+            ...randomTasks(game.numberOfLongTasks, taskLength.LONG)!]
+            */
         };
         game.players.push(player);
         message.channel.send(util.sendMessage(player.nickname + " has joined! [" + game.players.length + "/" + game.maxNumberOfPlayers + "]"));
@@ -376,6 +387,16 @@ exports.commandCollection.push({
                 }
             });
         }
+        game.players.forEach(function (player) {
+            if (player.role !== amongus_1.roles.MOD) {
+                client.users.fetch(player.id).then(function (user) {
+                    user.send(util.sendMessage("Your tasks are:"));
+                    player.tasks.forEach(function (task) {
+                        user.send(util.sendMessage("**" + task.duration + "**:\n                        **Name**: " + task.name + "\n                        **Description**: " + task.description + "\n                        **Room**: " + task.room, false));
+                    });
+                });
+            }
+        });
         gameStarted = true;
         message.channel.send(util.sendMessage("The game has now started, good luck!"));
         // TODO: Assign players some tasks
