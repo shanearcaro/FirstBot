@@ -1,0 +1,26 @@
+{
+    "task1": {
+        "name": "Cardio Time",
+        "description": "Run in place for 60 seconds",
+        "room": "308",
+        "duration": "LONG"
+    },
+    "task2": {
+        "name": "Meathead",
+        "description": "Do 100 push ups",
+        "room": "203",
+        "duration": "COMMON"
+    },
+    "task3": {
+        "name": "Cleaning Lady",
+        "description": "Mop the floor",
+        "room": "Laundry Room",
+        "duration": "SHORT"
+    },
+    "task4": {
+        "name": "Thirsty",
+        "description": "Drink a glass of water",
+        "room": "Kitchen",
+        "duration": "SHORT"
+    }
+}

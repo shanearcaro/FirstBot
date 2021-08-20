@@ -1,8 +1,7 @@
 import { Client, Message, TextBasedChannels, User, UserFlags, UserFlagsString } from "discord.js";
-import { AmongUs, Player, roles} from "../amongus";
+import { AmongUs, Player, roles, randomTasks, taskLength, Task } from "../amongus";
 import { Command } from "./commands";
 import * as util from "../utils"
-import { Channel } from "diagnostics_channel";
 const { prefix } = require("../../config/config");
 
 export const commandCollection: Command[] = [];
@@ -166,6 +165,17 @@ commandCollection.push({
             completedTasks: 0,
             dead: false,
             tasks: []
+            /**
+                Having problems with tasks being generated corretly
+                Something with the tasks array not being initialized
+                even though the game is initialized [amongus.ts]
+                Too tired to fix it right now, fix tomorrow
+            */
+            /**
+            [...randomTasks(game.numberOfShortTasks, taskLength.SHORT)!,
+            ...randomTasks(game.numberOfCommonTasks, taskLength.COMMON)!,
+            ...randomTasks(game.numberOfLongTasks, taskLength.LONG)!]
+            */
         }
 
         game.players.push(player);
@@ -419,6 +429,21 @@ commandCollection.push({
                 }
             });
         }
+
+        game.players.forEach((player: Player) => {
+            if (player.role !== roles.MOD) {
+                client.users.fetch(player.id).then((user: User) => {
+                    user.send(util.sendMessage(`Your tasks are:`));
+                    player.tasks.forEach((task: Task) => {
+                        user.send(util.sendMessage(`**${task.duration}**:
+                        **Name**: ${task.name}
+                        **Description**: ${task.description}
+                        **Room**: ${task.room}`, false));
+                    });
+                });
+            }
+        });
+
         gameStarted = true;
         message.channel.send(util.sendMessage(`The game has now started, good luck!`));
 
@@ -642,3 +667,4 @@ commandCollection.push({
         });
     }
 });
+
