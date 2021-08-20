@@ -1,8 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.randomTasks = exports.roles = exports.taskLength = exports.AmongUs = void 0;
+exports.randomTasks = exports.convertTaskToString = exports.roles = exports.taskLength = exports.AmongUs = exports.maxLongTasks = exports.maxCommonTasks = exports.maxShortTasks = void 0;
 var gameTasks = require("../tasks/task");
 var taskList;
+exports.maxShortTasks = 0;
+exports.maxCommonTasks = 0;
+exports.maxLongTasks = 0;
 var AmongUs = /** @class */ (function () {
     function AmongUs(maxNumberOfPlayers, numberOfShortTasks, numberOfCommonTasks, numberOfLongTasks, numberOfModerators, numberOfImposters) {
         if (maxNumberOfPlayers === void 0) { maxNumberOfPlayers = GAME_DEFAULTS.MAXPLAYERS; }
@@ -24,6 +27,7 @@ var AmongUs = /** @class */ (function () {
         this.totalTaskCount = 0;
         this.checkProblems();
         taskList = getTasks();
+        console.log("Task List: " + taskList);
     }
     // Set 
     AmongUs.prototype.setValues = function (maxNumberOfPlayers, numberOfShortTasks, numberOfCommonTasks, numberOfLongTasks, numberOfModerators, numberOfImpostors) {
@@ -91,25 +95,44 @@ function createTask(name, description, room, duration) {
         duration: duration
     };
 }
-function convertTask(length) {
+function convertStringToTask(length) {
     if (length === "SHORT")
         return taskLength.SHORT;
     else if (length === "COMMON")
         return taskLength.COMMON;
     return taskLength.LONG;
 }
+function convertTaskToString(length) {
+    if (length === taskLength.SHORT)
+        return "Short";
+    else if (length === taskLength.COMMON)
+        return "Common";
+    return "Long";
+}
+exports.convertTaskToString = convertTaskToString;
 function getTasks() {
     var tasks = [];
     for (var i in gameTasks) {
-        var task = createTask(gameTasks[i].name, gameTasks[i].description, gameTasks[i].room, convertTask(gameTasks[i].duration));
+        var task = createTask(gameTasks[i].name, gameTasks[i].description, gameTasks[i].room, convertStringToTask(gameTasks[i].duration));
+        if (task.duration == taskLength.SHORT)
+            exports.maxShortTasks++;
+        else if (task.duration == taskLength.COMMON)
+            exports.maxCommonTasks++;
+        else
+            exports.maxLongTasks++;
         tasks.push(task);
     }
     return tasks;
 }
 function randomTasks(amount, duration) {
     var randTasks = [];
-    var tasks = taskList.filter(function (task) {
-        task.duration = duration;
+    taskList.forEach(function (task) {
+        console.log(task.name + ", " + task.description + ", " + task.room + ", " + task.duration);
+    });
+    var tasks = [];
+    taskList.forEach(function (task) {
+        if (task.duration === duration)
+            tasks.push(task);
     });
     if (amount > tasks.length)
         return null;

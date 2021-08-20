@@ -18,6 +18,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.commandCollection = void 0;
 var amongus_1 = require("../amongus");
@@ -63,6 +70,21 @@ exports.commandCollection.push({
         var args = util.getArgumentsAsArray(message);
         if (!(args.length === 1 && args[0] === ""))
             game.setValues.apply(game, util.stringArrayToNumberArray(args));
+        if (game.numberOfShortTasks > amongus_1.maxShortTasks) {
+            message.channel.send(util.sendMessage("Cannot create all game properties: shorts tasks cannot exceed " + amongus_1.maxShortTasks));
+            message.channel.send(util.sendMessage("Game properties have been edited"));
+            game.numberOfShortTasks = amongus_1.maxShortTasks;
+        }
+        if (game.numberOfCommonTasks > amongus_1.maxCommonTasks) {
+            message.channel.send(util.sendMessage("Cannot create all game properties: common tasks cannot exceed " + amongus_1.maxCommonTasks));
+            message.channel.send(util.sendMessage("Game properties have been edited"));
+            game.numberOfCommonTasks = amongus_1.maxCommonTasks;
+        }
+        if (game.numberOfLongTasks > amongus_1.maxLongTasks) {
+            message.channel.send(util.sendMessage("Cannot create all game properties: common tasks cannot exceed " + amongus_1.maxLongTasks));
+            message.channel.send(util.sendMessage("Game properties have been edited"));
+            game.numberOfLongTasks = amongus_1.maxLongTasks;
+        }
         gameHost = message.author.tag;
         gameHostName = message.author.username;
         message.channel.send(util.sendMessage("Created Among Us Game:\n        Max Number of Players: " + game.maxNumberOfPlayers + "\n        Number of Short Tasks: " + game.numberOfShortTasks + "\n        Number of Common Tasks: " + game.numberOfCommonTasks + "\n        Number of Long Tasks: " + game.numberOfLongTasks + "\n        Number of Moderators: " + game.numberOfModerators + "\n        Number of Imposters: " + game.numberOfImposters));
@@ -96,6 +118,21 @@ exports.commandCollection.push({
         if (gameStarted) {
             message.channel.send(util.sendMessage("Cannot edit game: game has already started"));
             return;
+        }
+        if (game.numberOfShortTasks > amongus_1.maxShortTasks) {
+            message.channel.send(util.sendMessage("Cannot edit all game properties: shorts tasks cannot exceed " + amongus_1.maxShortTasks));
+            message.channel.send(util.sendMessage("Game properties have been edited"));
+            game.numberOfShortTasks = amongus_1.maxShortTasks;
+        }
+        if (game.numberOfCommonTasks > amongus_1.maxCommonTasks) {
+            message.channel.send(util.sendMessage("Cannot edit all game properties: common tasks cannot exceed " + amongus_1.maxCommonTasks));
+            message.channel.send(util.sendMessage("Game properties have been edited"));
+            game.numberOfCommonTasks = amongus_1.maxCommonTasks;
+        }
+        if (game.numberOfLongTasks > amongus_1.maxLongTasks) {
+            message.channel.send(util.sendMessage("Cannot edit all game properties: common tasks cannot exceed " + amongus_1.maxLongTasks));
+            message.channel.send(util.sendMessage("Game properties have been edited"));
+            game.numberOfLongTasks = amongus_1.maxLongTasks;
         }
         var args = util.getArgumentsAsArray(message);
         if (!(args.length === 1 && args[0] === ""))
@@ -152,18 +189,7 @@ exports.commandCollection.push({
             role: amongus_1.roles.PLAYER,
             completedTasks: 0,
             dead: false,
-            tasks: []
-            /**
-                Having problems with tasks being generated corretly
-                Something with the tasks array not being initialized
-                even though the game is initialized [amongus.ts]
-                Too tired to fix it right now, fix tomorrow
-            */
-            /**
-            [...randomTasks(game.numberOfShortTasks, taskLength.SHORT)!,
-            ...randomTasks(game.numberOfCommonTasks, taskLength.COMMON)!,
-            ...randomTasks(game.numberOfLongTasks, taskLength.LONG)!]
-            */
+            tasks: __spreadArrays(amongus_1.randomTasks(game.numberOfShortTasks, amongus_1.taskLength.SHORT), amongus_1.randomTasks(game.numberOfCommonTasks, amongus_1.taskLength.COMMON), amongus_1.randomTasks(game.numberOfLongTasks, amongus_1.taskLength.LONG))
         };
         game.players.push(player);
         message.channel.send(util.sendMessage(player.nickname + " has joined! [" + game.players.length + "/" + game.maxNumberOfPlayers + "]"));
@@ -390,9 +416,9 @@ exports.commandCollection.push({
         game.players.forEach(function (player) {
             if (player.role !== amongus_1.roles.MOD) {
                 client.users.fetch(player.id).then(function (user) {
-                    user.send(util.sendMessage("Your tasks are:"));
-                    player.tasks.forEach(function (task) {
-                        user.send(util.sendMessage("**" + task.duration + "**:\n                        **Name**: " + task.name + "\n                        **Description**: " + task.description + "\n                        **Room**: " + task.room, false));
+                    user.send(util.sendMessage("YOUR TASKS ARE:"));
+                    player.tasks.forEach(function (task, index) {
+                        user.send(util.sendMessage("**Task**: " + index + "**\nLength**: " + amongus_1.convertTaskToString(task.duration) + "\n**Name**: " + task.name + "\n**Description**: " + task.description + "\n**Room**: " + task.room, false));
                     });
                 });
             }
@@ -418,6 +444,10 @@ exports.commandCollection.push({
         if (game === null) {
             message.channel.send(util.sendMessage("Cannot finish task: no game is active."));
             message.channel.send(util.sendMessage("Use " + prefix + "create to create a new game."));
+            return;
+        }
+        if (!gameStarted) {
+            message.channel.send(util.sendMessage("Cannot finish task: game is not started"));
             return;
         }
         var totalTasks = (game === null || game === void 0 ? void 0 : game.numberOfShortTasks) + (game === null || game === void 0 ? void 0 : game.numberOfCommonTasks) + (game === null || game === void 0 ? void 0 : game.numberOfLongTasks);
@@ -467,6 +497,10 @@ exports.commandCollection.push({
         if (game === null) {
             message.channel.send(util.sendMessage("Cannot use command: no game is active."));
             message.channel.send(util.sendMessage("Use " + prefix + "create to create a new game."));
+            return;
+        }
+        if (!gameStarted) {
+            message.channel.send(util.sendMessage("Cannot mark players as dead: game is not started"));
             return;
         }
         var args = util.getArgumentsAsArray(message);
@@ -557,6 +591,10 @@ exports.commandCollection.push({
             message.channel.send(util.sendMessage("Use " + prefix + "create to create a new game."));
             return;
         }
+        if (!gameStarted) {
+            message.channel.send(util.sendMessage("Cannot report body: game is not started"));
+            return;
+        }
         game.players.forEach(function (player) {
             client.users.fetch(player.id).then(function (user) {
                 user.send(util.sendMessage("A BODY HAS BEEN REPORTED!"));
@@ -581,6 +619,10 @@ exports.commandCollection.push({
         if (game === null) {
             message.channel.send(util.sendMessage("Cannot call a meeting: no game is active."));
             message.channel.send(util.sendMessage("Use " + prefix + "create to create a new game."));
+            return;
+        }
+        if (!gameStarted) {
+            message.channel.send(util.sendMessage("Cannot call a meeting: game is not started"));
             return;
         }
         game.players.forEach(function (player) {
