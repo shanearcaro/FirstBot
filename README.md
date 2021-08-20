@@ -12,8 +12,8 @@
 
 | Command | Description | Arguments / Properties |
 | :-: | :-: | :-: |
-| create  | Create an Among Us Game | number of players, short tasks, common tasks,<br>long tasks, moderators, and impostes
-| edit    | Edit the game properties | number of players, short tasks, common tasks,<br>long tasks, moderators, and impostes
+| create  | Create an Among Us Game | number of players, short tasks, common tasks,<br>long tasks, moderators, and imposters
+| edit    | Edit the game properties | number of players, short tasks, common tasks,<br>long tasks, moderators, and imposters
 | join | Join the game| **N/A** |
 | leave | Leave the game | **N/A** |
 | start | Start the game | Game creator only |
