@@ -12,15 +12,15 @@ let gameStarted: boolean = false;
 let gameChannel: TextBasedChannels;
 
 // Shutdown command
-commandCollection.push({
-    command: "shutdown",
-    description: "Shut down the bot",
-    isDMable: false,
-    response: (client: Client, message: Message, isDM: boolean) => {
-        message.channel.send(`User ${client.user?.tag} is shutting down.`);
-        client.destroy();
-    }
-});
+// commandCollection.push({
+//     command: "shutdown",
+//     description: "Shut down the bot",
+//     isDMable: false,
+//     response: (client: Client, message: Message, isDM: boolean) => {
+//         message.channel.send(`User ${client.user?.tag} is shutting down.`);
+//         client.destroy();
+//     }
+// });
 
 // === In Person Among Us Commands Below ===
 commandCollection.push({
